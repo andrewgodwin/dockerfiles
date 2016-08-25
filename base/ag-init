@@ -1,0 +1,117 @@
+#!/usr/bin/python3
+
+"""
+Lightweight (well, apart from the fact it's Python) init process that does
+three things:
+    - Runs an /etc/rc.local if it exists
+    - Runs multiple programs from a list-form CMD in a Dockerfile, and
+      quits if any of them die.
+    - Reaps zombie processes.
+"""
+
+import os
+import sys
+import shlex
+import subprocess
+import errno
+
+
+# Seeing any of these makes us run in a shell rather than directly.
+SHELL_CHARS = "&;[]<>{}!$|"
+
+
+def nice_exit(code):
+    sys.stdout.write("ag-init: Exiting with code %s\n" % code)
+    sys.exit(code)
+
+
+def launcher(cmd):
+    """
+    Launches programs from a "cmd" list. This is the list from a CMD line
+    in the Dockerfile; we interpret it as a list of strings to run
+    (either in a shell, or directly using shlex.split if we can).
+
+    Returns a set of PIDs launched.
+    """
+    pids = set()
+    for cmdline in cmd:
+        sys.stdout.write("ag-init: Launching %s\n" % cmdline)
+        try:
+            if any(x in cmdline for x in SHELL_CHARS):
+                shell = True
+            else:
+                cmdline = shlex.split(cmdline)
+                shell = False
+            proc = subprocess.Popen(
+                cmdline,
+                shell=shell,
+                stderr=subprocess.STDOUT,
+            )
+        except OSError as err:
+            if err.errno == errno.ENOENT:
+                sys.stdout.write("ag-init: System cannot find file or directory.\n")
+            else:
+                sys.stdout.write("ag-init: Unknown error (%s)\n" % err)
+            nice_exit(-1)
+        else:
+            sys.stdout.write("ag-init: Started as %s\n" % proc.pid)
+            sys.stdout.flush()
+            pids.add(proc.pid)
+    return pids
+
+
+def reaper(pids):
+    """
+    Loops forever trying to reap processes (prevents zombie processes).
+    Pass in a list of "main" pids; if any of these exit, then return.
+    """
+    # Try a nonblocking reap first to make sure all children started
+    for main_pid in pids:
+        try:
+            dead_pid, status = os.waitpid(main_pid, os.WNOHANG)
+        except OSError as err:
+            # Oh dear.
+            if err.errno == errno.ECHILD or err.errno == errno.ESRCH:
+                return main_pid, None
+            # Some other error that isn't it being killed/dying.
+            else:
+                raise
+    # Loop forever and reap zombies, and maybe find a dead main program.
+    while True:
+        dead_pid, status = os.waitpid(-1, 0)
+        if dead_pid in pids:
+            return dead_pid, status
+
+
+def main():
+    # Get command-line args
+    cmd = sys.argv[1:]
+    if not cmd:
+        sys.stdout.write("ag-init: Empty program list.\n")
+        nice_exit(1)
+    # See if there's an /etc/rc.local to run
+    if os.path.isfile("/etc/rc.local"):
+        sys.stdout.write("ag-init: Running /etc/rc.local\n")
+        subprocess.check_call(
+            ["chmod", "+x", "/etc/rc.local"],
+            stderr=subprocess.STDOUT,
+        )
+        subprocess.check_call(
+            ["/etc/rc.local"],
+            cwd="/home/user/",
+            stderr=subprocess.STDOUT,
+        )
+    # Launch stuff
+    pids = launcher(cmd)
+    # Reap loop
+    try:
+        pid, status = reaper(pids)
+    except KeyboardInterrupt:
+        # We treat ctrl-c as a "clean" shutdown
+        nice_exit(0)
+    sys.stdout.write("ag-init: %s exited (status %s)\n" % (pid, status))
+    nice_exit(status)
+
+
+if __name__ == "__main__":
+    main()
