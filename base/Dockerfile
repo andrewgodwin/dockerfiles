@@ -11,6 +11,10 @@ ADD ssh_config /etc/ssh/ssh_config
 # dpkg configuration to always keep old config files
 RUN echo "force-confold\nforce-confdef" > /etc/dpkg/dpkg.cfg.d/forces
 
+# Make sure python 3 is around
+RUN apt-get update -qq && apt-get install -y \
+    python3
+
 # Install the new init script
 ADD ag-init /sbin/ag-init
 RUN chmod +x /sbin/ag-init; rm -r /etc/rc.*
