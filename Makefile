@@ -1,4 +1,4 @@
-.PHONY: all base simple-www varnish www-ssl utilishell cron
+.PHONY: all base simple-www varnish www-ssl utilishell cron get_iplayer
 
 all: base simple-www varnish www-ssl utilishell
 
@@ -19,3 +19,6 @@ utilishell:
 
 cron:
 	docker build -t andrewgodwin/cron cron
+
+get_iplayer:
+	docker build -t andrewgodwin/get_iplayer get_iplayer
