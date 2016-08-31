@@ -34,6 +34,7 @@ with open("/etc/nginx/sites.conf", "w") as fh:
                         proxy_set_header Host $http_host;
                         proxy_redirect off;
                         proxy_pass http://{backend};
+                        proxy_max_temp_file_size 0;
                     }}
                 }}
             """.format(domain=domain, **config))
