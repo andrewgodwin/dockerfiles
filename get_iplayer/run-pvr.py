@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import time
+import datetime
 import subprocess
 
 # Get target
@@ -22,7 +24,7 @@ subprocess.check_call(["rm", "-rf", os.path.join(profile_dir, "pvr_lock")])
 
 # Re-add searches
 for name, value in searches.items():
-    print("Adding PVR search %s: %s" % (name, value))
+    print("Adding PVR search %s: %s" % (name, value), file=sys.stderr)
     subprocess.check_call([
         binary,
         "--profile-dir=%s" % profile_dir,
@@ -34,7 +36,8 @@ for name, value in searches.items():
 # PVR loop
 while True:
     # Run PVR downloads
-    print("Running PVR download")
+    print("Starting loop at %s" % datetime.datetime.utcnow(), file=sys.stderr)
+    print("Running PVR download", file=sys.stderr)
     subprocess.call([
         binary,
         "--profile-dir=%s" % profile_dir,
@@ -45,7 +48,7 @@ while True:
         "-o", target,
     ])
     # Delete old PVR recordings
-    print("Deleting old recordings")
+    print("Deleting old recordings", file=sys.stderr)
     subprocess.check_call([
         "find",
         target,
@@ -55,5 +58,5 @@ while True:
         "-delete",
     ])
     # Sleeeeeep
-    print("Sleeping for an hour")
+    print("Sleeping for an hour", file=sys.stderr)
     time.sleep(3600)

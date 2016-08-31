@@ -1,4 +1,4 @@
-.PHONY: all base simple-www varnish www-ssl utilishell cron get_iplayer
+.PHONY: all base simple-www varnish www-ssl www-router utilishell cron get_iplayer
 
 all: base simple-www varnish www-ssl utilishell
 
@@ -7,6 +7,9 @@ base:
 
 simple-www:
 	docker build -t andrewgodwin/simple-www simple-www
+
+www-router:
+	docker build -t andrewgodwin/www-router www-router
 
 varnish:
 	docker build -t andrewgodwin/varnish varnish
