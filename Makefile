@@ -1,4 +1,4 @@
-.PHONY: all base simple-www varnish www-ssl www-router utilishell cron get_iplayer
+.PHONY: all base simple-www varnish www-ssl www-ssl-letsencrypt www-router utilishell cron get_iplayer samba
 
 all: base simple-www varnish www-ssl utilishell
 
@@ -17,6 +17,9 @@ varnish:
 www-ssl:
 	docker build -t andrewgodwin/www-ssl www-ssl
 
+www-ssl-letsencrypt:
+	docker build -t andrewgodwin/www-ssl-letsencrypt www-ssl-letsencrypt
+
 utilishell:
 	docker build -t andrewgodwin/utilishell utilishell
 
@@ -25,3 +28,6 @@ cron:
 
 get_iplayer:
 	docker build -t andrewgodwin/get_iplayer get_iplayer
+
+samba:
+	docker build -t andrewgodwin/samba samba

@@ -15,14 +15,10 @@ RUN apt-get update -qq && apt-get install -y \
     libffi-dev \
     ca-certificates
 
-# Get letsencrypt client
-RUN git clone https://github.com/letsencrypt/letsencrypt.git /opt/letsencrypt
-
 # Install the client and a newer version of six
 RUN pip install -U \
     six \
-    -e /opt/letsencrypt/acme \
-    -e /opt/letsencrypt/
+    git+https://github.com/certbot/certbot.git@v0.8.1
 
 # Make sure the challenge directory is present
 RUN mkdir /srv/www/
@@ -37,6 +33,6 @@ RUN chmod 775 /bin/run-letsencrypt
 
 # Run both nginx and the looping script to update the certs
 CMD [ \
-    "nginx", \
+    "openssl dhparam -out /etc/ssl/dhparams.pem 2048 && nginx", \
     "/bin/run-letsencrypt" \
 ]
