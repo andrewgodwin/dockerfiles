@@ -7,8 +7,15 @@ RUN apt-get update -qq && apt-get install -y \
     git \
     python3-pip \
     rsync \
-    openssh-client
+    openssh-client \
+    software-properties-common
 
-RUN pip3 install git+https://github.com/andrewgodwin/arcdiscvist@505d3feb
+RUN apt-add-repository ppa:brandonsnider/cdrtools && apt-get update -qq && apt-get install -y \
+    cdrecord \
+    udftools \
+    par2 \
+    eject
+
+RUN pip3 install git+https://github.com/andrewgodwin/arcdiscvist@b33d518
 
 CMD ["sleep infinity"]
