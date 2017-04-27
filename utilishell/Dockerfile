@@ -8,6 +8,8 @@ RUN apt-get update -qq && apt-get install -y \
     python3-pip \
     rsync \
     openssh-client \
+    vim-full \
+    nano \
     software-properties-common
 
 RUN apt-add-repository ppa:brandonsnider/cdrtools && apt-get update -qq && apt-get install -y \
