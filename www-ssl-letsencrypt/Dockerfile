@@ -13,12 +13,13 @@ RUN apt-get update -qq && apt-get install -y \
     libaugeas0 \
     libssl-dev \
     libffi-dev \
-    ca-certificates
+    ca-certificates \
+    software-properties-common
 
 # Install the client and a newer version of six
-RUN pip install -U \
-    six \
-    git+https://github.com/certbot/certbot.git@v0.8.1
+RUN add-apt-repository ppa:certbot/certbot && \
+    apt-get update -qq && \
+    apt-get install -y python-certbot-nginx
 
 # Make sure the challenge directory is present
 RUN mkdir /srv/www/
@@ -26,6 +27,7 @@ RUN mkdir /srv/www/
 # Install self-signed certs to power things until a real one happens
 ADD temporary-cert.crt /etc/ssl/www.crt
 ADD temporary-cert.key /etc/ssl/www.key
+ADD dhparams.pem /etc/ssl/dhparams.pem
 
 # Install update script
 ADD run-letsencrypt.sh /bin/run-letsencrypt
@@ -33,6 +35,6 @@ RUN chmod 775 /bin/run-letsencrypt
 
 # Run both nginx and the looping script to update the certs
 CMD [ \
-    "openssl dhparam -out /etc/ssl/dhparams.pem 2048 && nginx", \
+    "nginx", \
     "/bin/run-letsencrypt" \
 ]

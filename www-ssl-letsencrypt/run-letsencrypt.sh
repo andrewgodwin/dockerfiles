@@ -1,22 +1,25 @@
 #!/bin/bash
 
-# Wait for DH params to be generated
-while ! [ -f /etc/ssl/dhparams.pem ];
-do
-    sleep 1
-done
-echo "DH params present, starting cert negotiation"
-sleep 1
+set -e
+
+TRIES=0
 
 while :
 do
     # Run client to get cert
     certbot certonly --keep-until-expiring --webroot -w /srv/www/ --agree-tos -m $EMAIL -d $DOMAIN
-    # If no cert appeared, fail hard.
+    # If no cert appeared, try in a tighter loop
     if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
-        echo "Failed to get cert, exiting"
-        exit 1
+        TRIES=$((TRIES + 1))
+        if (( TRIES > 5 )); then
+            echo "Failed to get cert five times, exiting."
+            exit 1
+        else
+            echo "Failed to get cert, waiting 30s"
+            sleep 30
+        fi
     fi
+    TRIES=0
     # Copy keys/cert into right place
     cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/ssl/www.crt
     cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /etc/ssl/www.key
