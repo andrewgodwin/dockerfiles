@@ -16,7 +16,7 @@ RUN apt-get update -qq && apt-get install -y \
 
 # Download release
 RUN cd /srv && \
-    curl https://codeload.github.com/get-iplayer/get_iplayer/tar.gz/v2.96 | tar xvz && \
+    curl https://codeload.github.com/get-iplayer/get_iplayer/tar.gz/v3.01 | tar xvz && \
     mv get_iplayer-* get_iplayer
 
 # Install binaries

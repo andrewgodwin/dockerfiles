@@ -1,9 +1,10 @@
-FROM andrewgodwin/www-ssl
+FROM andrewgodwin/base
 
 MAINTAINER Andrew Godwin <andrew@aeracode.org>
 
 # Get basic system dependencies
 RUN apt-get update -qq && apt-get install -y \
+    nginx \
     git \
     python \
     python-dev \
@@ -16,10 +17,14 @@ RUN apt-get update -qq && apt-get install -y \
     ca-certificates \
     software-properties-common
 
-# Install the client and a newer version of six
+# Install the certbot client
 RUN add-apt-repository ppa:certbot/certbot && \
     apt-get update -qq && \
-    apt-get install -y python-certbot-nginx
+    apt-get install -y certbot
+
+# Set up nginx
+ADD nginx.conf /etc/nginx/nginx.conf
+EXPOSE 443
 
 # Make sure the challenge directory is present
 RUN mkdir /srv/www/

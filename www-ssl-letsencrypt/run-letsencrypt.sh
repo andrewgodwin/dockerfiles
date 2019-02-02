@@ -7,7 +7,7 @@ TRIES=0
 while :
 do
     # Run client to get cert
-    certbot certonly --keep-until-expiring --webroot -w /srv/www/ --agree-tos -m $EMAIL -d $DOMAIN
+    certbot certonly --webroot -w /srv/www/ --agree-tos -m $EMAIL -d $DOMAIN
     # If no cert appeared, try in a tighter loop
     if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
         TRIES=$((TRIES + 1))

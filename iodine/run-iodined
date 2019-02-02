@@ -1,0 +1,10 @@
+#!/bin/sh
+
+TUNNEL_IP=${IODINE_TUNNEL_IP:-"10.0.0.1"}
+
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
+
+echo "Running with host $IODINE_HOST"
+
+exec iodined -c -f $TUNNEL_IP $IODINE_HOST -P $IODINE_PASSWORD

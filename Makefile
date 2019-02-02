@@ -1,4 +1,4 @@
-.PHONY: all base simple-www varnish www-ssl www-ssl-letsencrypt www-router utilishell cron get_iplayer samba
+.PHONY: all base simple-www varnish www-ssl www-ssl-letsencrypt www-router utilishell cron get_iplayer samba iodine
 
 all: base simple-www varnish www-ssl utilishell
 
@@ -31,3 +31,6 @@ get_iplayer:
 
 samba:
 	docker build -t andrewgodwin/samba samba
+
+iodine:
+	docker build -t andrewgodwin/iodine iodine
